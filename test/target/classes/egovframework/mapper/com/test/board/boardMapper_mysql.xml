@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="TestBoardDAO">
+
+
+
+	<resultMap id="board" type="test.board.serivce.TestBoardVO">
+	<result property="board_id" column="board_id"/>
+	<result property= "writer" column="writer"/>
+	<result property = "title" column="title"/>
+	<result property="content" column="content"/>
+	<result property="regDate" column="regdate"/>
+	<result property="udt_Date" column="udt_date"/>	
+	<result property="pageIndex" column="pageIndex"></result>
+	<result property="pageUnit" column="pageUnit"></result>
+	<result property="pageSize" column="pageSize"></result>
+	<result property="firstIndex" column="firstIndex"></result>
+	<result property="lastIndex" column="lastIndex"></result>
+	<result property="searchKeyword" column="searchKeyword"/>
+	<result property="searchType" column="searchType"/>
+	<result property="recordCountPerPage" column="recordCountPerPage"></result>
+	<result property="rowNo" column="rowNo"></result>
+	</resultMap>
+
+
+
+<!-- 게시글 목록 조회 -->
+	<select id="selectList" resultMap="board">
+	select *
+	from board
+	<trim prefix="WHERE" prefixOverrides="AND|OR">
+		<if test="searchType == 'title'">AND
+					title LIKE CONCAT ('%', #{searchKeyword},'%') 		
+			</if>
+			<if test="searchType == 'content'">AND
+					content LIKE CONCAT ('%', #{searchKeyword},'%') 		
+			</if>	
+			<if test="searchType == 'writer'">AND
+					writer LIKE CONCAT ('%', #{searchKeyword},'%') 		
+			</if>				
+	</trim>
+  	Order by 
+	board_id DESC
+    LIMIT #{firstIndex} , #{recordCountPerPage} 
+	</select>
+
+<!-- 게시글의 전체 갯수 -->
+	<select id="selectArticleListCnt" resultType="int">
+	select count(*) as boardCnt
+	From board
+		<trim prefix="WHERE" prefixOverrides="AND|OR">
+		<if test="searchType == 'title'">AND
+					title LIKE CONCAT ('%', #{searchKeyword},'%') 		
+			</if>
+			<if test="searchType == 'content'">AND
+					content LIKE CONCAT ('%', #{searchKeyword},'%') 		
+			</if>	
+			<if test="searchType == 'writer'">AND
+					writer LIKE CONCAT ('%', #{searchKeyword},'%') 		
+			</if>				
+	</trim>
+	</select>
+<!-- 게시글 삽입 -->
+	<insert id="insertBoard" parameterType="test.board.serivce.TestBoardVO">
+		<![CDATA[INSERT INTO board (writer,title,content,regdate)
+		values (#{writer}, #{title}, #{content}, now())]]>
+	</insert>
+	
+		
+<!-- 게시글 클릭시 detailView -->	
+	<select id="selectDetail"  parameterType="test.board.serivce.TestBoardVO" resultMap="board"> 
+	<![CDATA[
+			select * 
+			from board 
+			where board_id = #{board_id}
+	]]>	
+	</select>
+	
+	<update id="updateBoard">
+	 	update board set 
+	 	 writer = #{writer}
+	 	, title = #{title}
+	 	, content = #{content}
+	 	, udt_date = now()
+	 	where board_id = #{board_id}
+	 	
+	</update>
+	
+	<delete id="deleteBoard">
+		delete from board
+		where
+		board_id = #{board_id}
+	</delete>
+		
+	</mapper>
